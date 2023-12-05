@@ -1,8 +1,9 @@
 import re
+from datetime import datetime, date
 from inspect import ismethod
 
 from django.template import loader
-from django.utils import datetime_safe
+from django.utils.formats import localize_input
 
 from haystack.exceptions import SearchFieldError
 from haystack.utils import get_model_ct_tuple
@@ -392,12 +393,12 @@ class DateField(SearchField):
 
         if isinstance(value, str):
             match = DATE_REGEX.search(value)
-
+            
             if match:
                 data = match.groupdict()
-                return datetime_safe.date(
+                return localize_input(date(
                     int(data["year"]), int(data["month"]), int(data["day"])
-                )
+                ))
             else:
                 raise SearchFieldError(
                     "Date provided to '%s' field doesn't appear to be a valid date string: '%s'"
@@ -428,14 +429,14 @@ class DateTimeField(SearchField):
 
             if match:
                 data = match.groupdict()
-                return datetime_safe.datetime(
+                return localize_input(datetime(
                     int(data["year"]),
                     int(data["month"]),
                     int(data["day"]),
                     int(data["hour"]),
                     int(data["minute"]),
                     int(data["second"]),
-                )
+                ))
             else:
                 raise SearchFieldError(
                     "Datetime provided to '%s' field doesn't appear to be a valid datetime string: '%s'"

@@ -4,10 +4,11 @@ import re
 import shutil
 import threading
 import warnings
+from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.datetime_safe import date, datetime
+from django.utils.formats import localize_input
 from django.utils.encoding import force_str
 
 from haystack.backends import (
@@ -470,7 +471,7 @@ class WhooshSearchBackend(BaseSearchBackend):
                 if isinstance(dt, datetime):
                     return dt
                 if isinstance(dt, date):
-                    return datetime(dt.year, dt.month, dt.day)
+                    return localize_input(datetime(dt.year, dt.month, dt.day))
                 raise ValueError
 
             for key, value in date_facets.items():
@@ -864,7 +865,7 @@ class WhooshSearchBackend(BaseSearchBackend):
         """
         if hasattr(value, "strftime"):
             if not hasattr(value, "hour"):
-                value = datetime(value.year, value.month, value.day, 0, 0, 0)
+                value = localize_input(datetime(value.year, value.month, value.day, 0, 0, 0))
         elif isinstance(value, bool):
             if value:
                 value = "true"
@@ -899,14 +900,14 @@ class WhooshSearchBackend(BaseSearchBackend):
                 for dk, dv in date_values.items():
                     date_values[dk] = int(dv)
 
-                return datetime(
+                return localize_input(datetime(
                     date_values["year"],
                     date_values["month"],
                     date_values["day"],
                     date_values["hour"],
                     date_values["minute"],
                     date_values["second"],
-                )
+                ))
 
         try:
             # Attempt to use json to load the values.
